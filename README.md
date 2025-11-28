@@ -106,3 +106,139 @@ Ao concluir qualquer um dos níveis, você terá desenvolvido um sistema de inve
 Boa sorte, e divirta-se programando com **Detective Quest**!
 
 Equipe de Ensino – Enigma Studios
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* ------------------------------------------------------
+   Estrutura: Sala (nó de uma árvore binária)
+   Cada sala tem:
+   - nome
+   - ponteiro para sala à esquerda
+   - ponteiro para sala à direita
+   ------------------------------------------------------ */
+typedef struct Sala {
+    char nome[50];
+    struct Sala *esquerda;
+    struct Sala *direita;
+} Sala;
+
+/* ------------------------------------------------------
+   criarSala()
+   Cria dinamicamente uma sala da mansão.
+   ------------------------------------------------------ */
+Sala* criarSala(const char *nome) {
+    Sala *nova = (Sala*) malloc(sizeof(Sala));
+
+    if (nova == NULL) {
+        printf("Erro de alocação de memória!\n");
+        exit(1);
+    }
+
+    strcpy(nova->nome, nome);
+    nova->esquerda = NULL;
+    nova->direita = NULL;
+
+    return nova;
+}
+
+/* ------------------------------------------------------
+   explorarSalas()
+   Permite ao jogador navegar pela árvore binária.
+   - e → esquerda
+   - d → direita
+   - s → sair
+   A exploração termina quando chega a um nó-folha.
+   ------------------------------------------------------ */
+void explorarSalas(Sala *atual) {
+    char opcao;
+
+    while (atual != NULL) {
+
+        printf("\nVocê está agora em: %s\n", atual->nome);
+
+        // Caso seja um nó-folha (sem salas à esquerda e à direita)
+        if (atual->esquerda == NULL && atual->direita == NULL) {
+            printf("Não há mais caminhos. Fim da exploração!\n");
+            return;
+        }
+
+        printf("\nPara onde deseja ir?\n");
+        if (atual->esquerda != NULL)
+            printf(" (e) Ir para a esquerda → %s\n", atual->esquerda->nome);
+        if (atual->direita != NULL)
+            printf(" (d) Ir para a direita  → %s\n", atual->direita->nome);
+
+        printf(" (s) Sair da exploração\n");
+        printf("Escolha: ");
+
+        scanf(" %c", &opcao);
+
+        if (opcao == 'e' || opcao == 'E') {
+            if (atual->esquerda != NULL)
+                atual = atual->esquerda;
+            else
+                printf("Não existe caminho para a esquerda!\n");
+        }
+        else if (opcao == 'd' || opcao == 'D') {
+            if (atual->direita != NULL)
+                atual = atual->direita;
+            else
+                printf("Não existe caminho para a direita!\n");
+        }
+        else if (opcao == 's' || opcao == 'S') {
+            printf("Exploração encerrada!\n");
+            return;
+        }
+        else {
+            printf("Opção inválida! Tente novamente.\n");
+        }
+    }
+}
+
+/* ------------------------------------------------------
+   liberarArvore()
+   Libera toda memória usada pela árvore.
+   ------------------------------------------------------ */
+void liberarArvore(Sala *raiz) {
+    if (raiz == NULL) return;
+
+    liberarArvore(raiz->esquerda);
+    liberarArvore(raiz->direita);
+    free(raiz);
+}
+
+/* ------------------------------------------------------
+   main()
+   Monta a árvore binária da mansão.
+   Inicia a exploração.
+   ------------------------------------------------------ */
+int main() {
+
+    // Raiz da árvore (primeiro cômodo)
+    Sala *hall = criarSala("Hall de Entrada");
+
+    // Construção fixa da árvore (nível novato)
+    hall->esquerda = criarSala("Sala de Estar");
+    hall->direita  = criarSala("Cozinha");
+
+    hall->esquerda->esquerda = criarSala("Quarto de Hóspedes");
+    hall->esquerda->direita  = criarSala("Jardim Interno");
+
+    hall->direita->esquerda  = criarSala("Despensa");
+    hall->direita->direita   = criarSala("Garagem");
+
+    printf("=============================================\n");
+    printf("         DETECTIVE QUEST - Nível Novato\n");
+    printf("     Explore a mansão e encontre o caminho!\n");
+    printf("=============================================\n");
+
+    // Iniciar exploração pela raíz
+    explorarSalas(hall);
+
+    // Liberar memória ao final
+    liberarArvore(hall);
+
+    return 0;
+}
